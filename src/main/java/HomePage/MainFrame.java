@@ -1,19 +1,22 @@
 package HomePage;
 
-import javax.swing.*;
-import java.awt.*;
-import Usuarios.CadastroUsuarioFrame;
-import Usuarios.GerenciarUsuariosFrame;
 import Produtos.CadastroProdutoFrame;
 import Produtos.GerenciarProdutosFrame;
+import Usuarios.CadastroUsuarioFrame;
+import Usuarios.GerenciarUsuariosFrame;
+import Vendas.RegistrarVendaFrame;
+import Usuarios.Usuario;
+
+import javax.swing.*;
+import java.awt.*;
 import com.formdev.flatlaf.FlatLightLaf;
 
 public class MainFrame extends JFrame {
 
-    private String tipoUsuario;
+    private Usuario usuarioLogado;
 
-    public MainFrame(String tipoUsuario) {
-        this.tipoUsuario = tipoUsuario;
+    public MainFrame(Usuario usuarioLogado) {
+        this.usuarioLogado = usuarioLogado;
 
         // ⚡ Aplica tema FlatLaf moderno
         try {
@@ -30,8 +33,6 @@ public class MainFrame extends JFrame {
         // MenuBar estilizado
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        // Menus com cores e fontes mais modernas
         Font menuFont = new Font("Segoe UI", Font.BOLD, 14);
         Font itemFont = new Font("Segoe UI", Font.PLAIN, 13);
 
@@ -61,11 +62,12 @@ public class MainFrame extends JFrame {
         menuGerenciar.add(submenuProdutos);
 
         // Menu Vendas
-        JMenu menuVendas = new JMenu("Vendas");
-        menuVendas.setFont(menuFont);
+        JMenu submenuVendas = new JMenu("Vendas");
+        submenuVendas.setFont(menuFont);
         JMenuItem novaVenda = new JMenuItem("Nova Venda");
         novaVenda.setFont(itemFont);
-        menuVendas.add(novaVenda);
+        submenuVendas.add(novaVenda);
+        menuBar.add(submenuVendas);
 
         // Menu Relatórios
         JMenu menuRelatorios = new JMenu("Relatórios");
@@ -75,16 +77,15 @@ public class MainFrame extends JFrame {
         menuRelatorios.add(relFinanceiro);
 
         menuBar.add(menuGerenciar);
-        menuBar.add(menuVendas);
-        menuBar.add(menuRelatorios);
+        menuBar.add(submenuVendas);
+        /*menuBar.add(menuRelatorios);*/
 
         setJMenuBar(menuBar);
 
         // Controle de permissões
-        if("Funcionario".equals(tipoUsuario)) {
+        if ("Funcionario".equals(usuarioLogado.getTipo())) {
             submenuUsuarios.setVisible(false);
             listarUsuarios.setVisible(false);
-            menuRelatorios.setVisible(false);
         }
 
         // Painel principal central
@@ -92,7 +93,7 @@ public class MainFrame extends JFrame {
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setLayout(new BorderLayout());
 
-        JLabel welcomeLabel = new JLabel("Bem-vindo ao MerControle", SwingConstants.CENTER);
+        JLabel welcomeLabel = new JLabel("Bem-vindo ao MerControle, " + usuarioLogado.getNome() + ".", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         welcomeLabel.setForeground(new Color(45, 45, 45));
         mainPanel.add(welcomeLabel, BorderLayout.CENTER);
@@ -103,12 +104,19 @@ public class MainFrame extends JFrame {
         cadastrarUsuario.addActionListener(e -> new CadastroUsuarioFrame().setVisible(true));
         listarUsuarios.addActionListener(e -> new GerenciarUsuariosFrame().setVisible(true));
         cadastrarProduto.addActionListener(e -> new CadastroProdutoFrame().setVisible(true));
-        listarProduto.addActionListener(e -> new GerenciarProdutosFrame("Administrador".equals(tipoUsuario)).setVisible(true));
-        novaVenda.addActionListener(e -> JOptionPane.showMessageDialog(this, "Abrir tela de vendas"));
-        relFinanceiro.addActionListener(e -> JOptionPane.showMessageDialog(this, "Abrir relatório financeiro"));
+        listarProduto.addActionListener(e -> new GerenciarProdutosFrame("Administrador".equals(usuarioLogado.getTipo())).setVisible(true));
+        novaVenda.addActionListener(e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true));
+        /*relFinanceiro.addActionListener(e -> JOptionPane.showMessageDialog(this, "Abrir relatório financeiro"));*/
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame("Administrador").setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            // 🔹 Criando um usuário fictício para iniciar a aplicação
+            Usuario admin = new Usuario();
+            admin.setNome("Administrador");
+            admin.setTipo("Administrador");
+
+            new MainFrame(admin).setVisible(true);
+        });
     }
 }
