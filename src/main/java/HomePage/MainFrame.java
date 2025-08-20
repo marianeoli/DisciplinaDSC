@@ -6,6 +6,9 @@ import Usuarios.CadastroUsuarioFrame;
 import Usuarios.GerenciarUsuariosFrame;
 import Vendas.RegistrarVendaFrame;
 import Usuarios.Usuario;
+import Relatorios.RelatorioEstoqueFrame;
+import Relatorios.RelatorioFinanceiroFrame;
+import Relatorios.RelatorioVendasFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,13 +75,19 @@ public class MainFrame extends JFrame {
         // Menu Relatórios
         JMenu menuRelatorios = new JMenu("Relatórios");
         menuRelatorios.setFont(menuFont);
+        JMenuItem relEstoque = new JMenuItem("Estoque");
+        relEstoque.setFont(itemFont);
+        menuRelatorios.add(relEstoque);
         JMenuItem relFinanceiro = new JMenuItem("Financeiro");
         relFinanceiro.setFont(itemFont);
         menuRelatorios.add(relFinanceiro);
+        JMenuItem relVendas = new JMenuItem("Vendas");
+        relVendas.setFont(itemFont);
+        menuRelatorios.add(relVendas);
 
         menuBar.add(menuGerenciar);
         menuBar.add(submenuVendas);
-        /*menuBar.add(menuRelatorios);*/
+        menuBar.add(menuRelatorios);
 
         setJMenuBar(menuBar);
 
@@ -106,7 +115,9 @@ public class MainFrame extends JFrame {
         cadastrarProduto.addActionListener(e -> new CadastroProdutoFrame().setVisible(true));
         listarProduto.addActionListener(e -> new GerenciarProdutosFrame("Administrador".equals(usuarioLogado.getTipo())).setVisible(true));
         novaVenda.addActionListener(e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true));
-        /*relFinanceiro.addActionListener(e -> JOptionPane.showMessageDialog(this, "Abrir relatório financeiro"));*/
+        relFinanceiro.addActionListener(e -> new RelatorioEstoqueFrame().setVisible(true));
+        relFinanceiro.addActionListener(e -> new RelatorioFinanceiroFrame(10, 12).setVisible(true));
+        relFinanceiro.addActionListener(e -> new RelatorioVendasFrame().setVisible(true));
     }
 
     public static void main(String[] args) {
