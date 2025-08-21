@@ -1,18 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Produtos;
 
-/**
- *
- * @author mariane
- */
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.*;
-import HomePage.Database;
 import java.math.BigDecimal;
+import HomePage.Database;
 
 public class EditarProdutoFrame extends JFrame {
 
@@ -25,47 +18,111 @@ public class EditarProdutoFrame extends JFrame {
         this.parent = parent;
 
         setTitle("Editar Produto");
-        setSize(400, 300);
+        setSize(500, 400);
         setLocationRelativeTo(null);
-        setLayout(new GridBagLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+        
+        JPanel painelPrincipal = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(0x00A86B), 
+                        0, getHeight(), new Color(0x006B46) 
+                );
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                g2d.dispose();
+            }
+        };
+        painelPrincipal.setLayout(new GridBagLayout());
+        painelPrincipal.setBorder(new EmptyBorder(20, 20, 20, 20));
+        add(painelPrincipal);
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5,5,5,5);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Nome
-        add(new JLabel("Nome:"), gbc);
-        gbc.gridx = 1;
-        nomeField = new JTextField(20);
-        add(nomeField, gbc);
+        Font labelFont = new Font("SansSerif", Font.BOLD, 14);
 
-        // Preço de compra
+     
+        JLabel nomeLabel = new JLabel("Nome:");
+        nomeLabel.setForeground(Color.WHITE);
+        nomeLabel.setFont(labelFont);
+        gbc.gridx = 0; gbc.gridy = 0;
+        painelPrincipal.add(nomeLabel, gbc);
+
+        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        nomeField = new JTextField(18);
+        nomeField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        nomeField.setForeground(Color.BLACK);
+        nomeField.setBackground(Color.WHITE);
+        nomeField.setBorder(BorderFactory.createLineBorder(new Color(0x006B46), 2));
+        nomeField.putClientProperty("JTextField.placeholderText", "Digite o nome do produto");
+        painelPrincipal.add(nomeField, gbc);
+
+        
+        JLabel precoCompraLabel = new JLabel("Preço de Compra:");
+        precoCompraLabel.setForeground(Color.WHITE);
+        precoCompraLabel.setFont(labelFont);
         gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Preço de Compra:"), gbc);
-        gbc.gridx = 1;
-        precoCompraField = new JTextField(20);
-        add(precoCompraField, gbc);
+        painelPrincipal.add(precoCompraLabel, gbc);
 
-        // Preço de venda
+        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        precoCompraField = new JTextField(18);
+        precoCompraField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        precoCompraField.setForeground(Color.BLACK);
+        precoCompraField.setBackground(Color.WHITE);
+        precoCompraField.setBorder(BorderFactory.createLineBorder(new Color(0x006B46), 2));
+        precoCompraField.putClientProperty("JTextField.placeholderText", "Digite o preço de compra");
+        painelPrincipal.add(precoCompraField, gbc);
+
+        
+        JLabel precoVendaLabel = new JLabel("Preço de Venda:");
+        precoVendaLabel.setForeground(Color.WHITE);
+        precoVendaLabel.setFont(labelFont);
         gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Preço de Venda:"), gbc);
-        gbc.gridx = 1;
-        precoVendaField = new JTextField(20);
-        add(precoVendaField, gbc);
+        painelPrincipal.add(precoVendaLabel, gbc);
 
-        // Estoque
+        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        precoVendaField = new JTextField(18);
+        precoVendaField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        precoVendaField.setForeground(Color.BLACK);
+        precoVendaField.setBackground(Color.WHITE);
+        precoVendaField.setBorder(BorderFactory.createLineBorder(new Color(0x006B46), 2));
+        precoVendaField.putClientProperty("JTextField.placeholderText", "Digite o preço de venda");
+        painelPrincipal.add(precoVendaField, gbc);
+
+        
+        JLabel estoqueLabel = new JLabel("Quantidade em Estoque:");
+        estoqueLabel.setForeground(Color.WHITE);
+        estoqueLabel.setFont(labelFont);
         gbc.gridx = 0; gbc.gridy = 3;
-        add(new JLabel("Estoque:"), gbc);
-        gbc.gridx = 1;
-        estoqueField = new JTextField(20);
-        add(estoqueField, gbc);
+        painelPrincipal.add(estoqueLabel, gbc);
 
-        // Botão salvar
-        gbc.gridx = 1; gbc.gridy = 4;
+        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        estoqueField = new JTextField(18);
+        estoqueField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        estoqueField.setForeground(Color.BLACK);
+        estoqueField.setBackground(Color.WHITE);
+        estoqueField.setBorder(BorderFactory.createLineBorder(new Color(0x006B46), 2));
+        estoqueField.putClientProperty("JTextField.placeholderText", "Digite a quantidade");
+        painelPrincipal.add(estoqueField, gbc);
+
+        
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         JButton salvarButton = new JButton("Salvar");
-        add(salvarButton, gbc);
+        salvarButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+        salvarButton.setForeground(Color.WHITE);
+        salvarButton.setBackground(new Color(0x00A86B));
+        salvarButton.setFocusPainted(false);
+        salvarButton.setBorder(BorderFactory.createLineBorder(new Color(0x006B46), 2));
+        salvarButton.setPreferredSize(new Dimension(150, 40));
+        painelPrincipal.add(salvarButton, gbc);
 
         salvarButton.addActionListener(e -> salvarEdicao());
 
@@ -78,13 +135,13 @@ public class EditarProdutoFrame extends JFrame {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, produtoId);
             ResultSet rs = stmt.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 nomeField.setText(rs.getString("nome"));
                 precoCompraField.setText(rs.getBigDecimal("preco_compra").toString());
                 precoVendaField.setText(rs.getBigDecimal("preco_venda").toString());
                 estoqueField.setText(String.valueOf(rs.getInt("estoque")));
             }
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao carregar produto.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
@@ -103,7 +160,7 @@ public class EditarProdutoFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Produto atualizado com sucesso!");
             parent.atualizarTabela();
             dispose();
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao atualizar produto.", "Erro", JOptionPane.ERROR_MESSAGE);
         }

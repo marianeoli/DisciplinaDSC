@@ -10,7 +10,7 @@ public class Produto {
     private BigDecimal precoVenda;
     private int estoque;
 
-    // Getters e Setters
+    // Get e Set
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

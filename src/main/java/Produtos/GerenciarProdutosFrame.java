@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Produtos;
 
-/**
- *
- * @author mariane
- */
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -27,22 +19,60 @@ public class GerenciarProdutosFrame extends JFrame {
         setTitle("Gerenciar Produtos");
         setSize(700, 400);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Tabela
+       
+        JPanel bgPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(0, 100, 0),   // verde escuro
+                        getWidth(), getHeight(), new Color(144, 238, 144) // verde claro
+                );
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        bgPanel.setOpaque(false);
+        setContentPane(bgPanel);
+
+        
+        UIManager.put("Label.font", new Font("SansSerif", Font.PLAIN, 14));
+        UIManager.put("Table.font", new Font("SansSerif", Font.PLAIN, 13));
+        UIManager.put("Button.font", new Font("SansSerif", Font.BOLD, 13));
+
+        
         modelo = new DefaultTableModel(new String[]{"ID", "Código", "Nome", "Preço Compra", "Preço Venda", "Estoque"}, 0) {
             public boolean isCellEditable(int row, int column) {
-                return false; // não editável diretamente
+                return false;
             }
         };
         tabela = new JTable(modelo);
-        add(new JScrollPane(tabela), BorderLayout.CENTER);
+        tabela.setBackground(Color.WHITE);
+        tabela.setForeground(Color.BLACK);
+        tabela.setGridColor(new Color(34, 139, 34));
+        tabela.setSelectionBackground(new Color(60, 179, 113));
+        tabela.setSelectionForeground(Color.WHITE);
 
-        // Botões
+        JScrollPane scrollPane = new JScrollPane(tabela);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        bgPanel.add(scrollPane, BorderLayout.CENTER);
+
+      
         JPanel botoesPanel = new JPanel();
+        botoesPanel.setOpaque(false);
+
         JButton btnEditar = new JButton("Editar");
         JButton btnExcluir = new JButton("Excluir");
+
+        
+        Color verdeEscuro = new Color(0, 128, 0);
+        Color verdeClaro = new Color(144, 238, 144);
+        estilizarBotao(btnEditar, verdeEscuro, verdeClaro);
+        estilizarBotao(btnExcluir, verdeEscuro, verdeClaro);
+
         botoesPanel.add(btnEditar);
         botoesPanel.add(btnExcluir);
 
@@ -51,17 +81,36 @@ public class GerenciarProdutosFrame extends JFrame {
             btnExcluir.setEnabled(false);
         }
 
-        add(botoesPanel, BorderLayout.SOUTH);
+        bgPanel.add(botoesPanel, BorderLayout.SOUTH);
 
-        // Ações
+        
         btnEditar.addActionListener(e -> editarProduto());
         btnExcluir.addActionListener(e -> deletarProduto());
 
         carregarProdutos();
     }
 
+    private void estilizarBotao(JButton botao, Color corFundo, Color corHover) {
+        botao.setBackground(corFundo);
+        botao.setForeground(Color.WHITE);
+        botao.setFocusPainted(false);
+        botao.setBorderPainted(false);
+        botao.setOpaque(true);
+
+        botao.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                botao.setBackground(corHover);
+                botao.setForeground(Color.BLACK);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                botao.setBackground(corFundo);
+                botao.setForeground(Color.WHITE);
+            }
+        });
+    }
+
     private void carregarProdutos() {
-        modelo.setRowCount(0); // limpa tabela
+        modelo.setRowCount(0);
         try (Connection conn = Database.getConnection()) {
             String sql = "SELECT * FROM produtos";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -118,7 +167,6 @@ public class GerenciarProdutosFrame extends JFrame {
             }
         }
     }
-
 
     public void atualizarTabela() {
         carregarProdutos();

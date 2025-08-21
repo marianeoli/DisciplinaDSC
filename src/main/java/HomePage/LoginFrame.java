@@ -29,7 +29,7 @@ public class LoginFrame extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gp = new GradientPaint(
-                        0, 0, new Color(0x00A86B), // Verde lésbico
+                        0, 0, new Color(0x00A86B), // Verde
                         0, getHeight(), new Color(0x006B46) // Verde mais escuro
                 );
                 g2d.setPaint(gp);
