@@ -132,26 +132,46 @@ public class GerenciarProdutosFrame extends JFrame {
     }
 
     private void deletarProduto() {
-        int linha = tabela.getSelectedRow();
-        if(linha == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto para excluir.");
+        int selectedRow = tabela.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto para deletar.", "Atenção", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int id = (int) tabela.getValueAt(linha, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Deseja realmente excluir este produto?", "Confirmação", JOptionPane.YES_NO_OPTION);
-        if(confirm == JOptionPane.YES_OPTION){
-            try (Connection conn = Database.getConnection()) {
+        int id = (int) modelo.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja deletar este produto?");
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try (Connection conn = Database.getConnection()) {
+            conn.setAutoCommit(false); // iniciar transação
+            try {
+                // 1️⃣ Desvincular itens de venda
+                String desvincular = "UPDATE vendaItens SET produtoId = NULL WHERE produtoId = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(desvincular)) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+
+                // 2️⃣ Deletar produto
                 String sql = "DELETE FROM produtos WHERE id = ?";
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setInt(1, id);
-                stmt.executeUpdate();
-                carregarProdutos();
-                JOptionPane.showMessageDialog(this, "Produto excluído com sucesso!");
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+
+                conn.commit(); // confirmar transação
+                modelo.removeRow(selectedRow); // atualizar tabela na interface
+                JOptionPane.showMessageDialog(this, "Produto deletado com sucesso!");
             } catch (SQLException ex) {
+                conn.rollback(); // desfaz alterações caso ocorra erro
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Erro ao excluir produto.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Erro ao deletar produto. Transação revertida.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 

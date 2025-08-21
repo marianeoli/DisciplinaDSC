@@ -1,0 +1,11 @@
+services:
+  database:
+    image: mysql:8.0.41
+    container_name: database_mer
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: MerControle
+      MYSQL_ROOT_PASSWORD: 1234
+      SERVICE_NAME: mysql
+      TZ: 'America/Fortaleza' 

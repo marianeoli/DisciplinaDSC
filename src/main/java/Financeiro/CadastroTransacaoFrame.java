@@ -109,8 +109,11 @@ public class CadastroTransacaoFrame extends JFrame {
         salvarBtn.setBackground(new Color(0x00A86B));
         salvarBtn.setFocusPainted(false);
         salvarBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        salvarBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        salvarBtn.putClientProperty("FlatLaf.style", "arc: 10");
+
+        // Borda arredondada compatível com FlatLaf 3.x
+        salvarBtn.putClientProperty("JButton.style", "roundRect");
+        salvarBtn.putClientProperty("JButton.arc", 12); // raio da curva dos cantos
+
         salvarBtn.addActionListener(this::salvarTransacao);
 
         gbc.gridx = 0;

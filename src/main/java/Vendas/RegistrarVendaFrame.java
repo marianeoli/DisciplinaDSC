@@ -17,12 +17,13 @@ public class RegistrarVendaFrame extends JFrame {
     private DefaultTableModel carrinhoModel;
     private JTable carrinhoTable;
     private Usuario usuarioLogado;
+    private JLabel totalLabel;
 
     public RegistrarVendaFrame(Usuario usuarioLogado) {
         this.usuarioLogado = usuarioLogado;
 
         setTitle("Registrar Venda");
-        setSize(600, 400);
+        setSize(600, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -98,6 +99,17 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.weighty = 1;
         mainPanel.add(scroll, gbc);
 
+        // --- Label do total da venda ---
+        totalLabel = new JLabel("Total: R$ 0.00", SwingConstants.RIGHT);
+        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        totalLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0; gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weighty = 0;
+        mainPanel.add(totalLabel, gbc);
+        gbc.gridwidth = 1;
+
         addProdutoBtn.addActionListener(e -> adicionarProduto());
         finalizarBtn.addActionListener(e -> {
             try {
@@ -111,9 +123,10 @@ public class RegistrarVendaFrame extends JFrame {
 
     private void carregarProdutos() {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT id, nome, preco_venda FROM produtos";
+            String sql = "SELECT id, nome, preco_venda FROM produtos WHERE estoque > 0 ORDER BY nome";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
+            produtoCombo.removeAllItems(); // limpa itens antigos
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String nome = rs.getString("nome");
@@ -149,64 +162,92 @@ public class RegistrarVendaFrame extends JFrame {
 
                 BigDecimal subtotal = preco.multiply(BigDecimal.valueOf(qtd));
                 carrinhoModel.addRow(new Object[]{produtoId + " - " + nome, qtd, preco, subtotal});
+
+                atualizarTotal();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void registrarVenda() throws SQLException {
-        try (Connection conn = Database.getConnection()) {
-            conn.setAutoCommit(false);
-
-            BigDecimal totalVenda = BigDecimal.ZERO;
-            for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
-                totalVenda = totalVenda.add((BigDecimal) carrinhoModel.getValueAt(i, 3));
-            }
-
-            String sqlVenda = "INSERT INTO vendas (data, valorTotal, usuarioId) VALUES (?, ?, ?)";
-            PreparedStatement stmtVenda = conn.prepareStatement(sqlVenda, Statement.RETURN_GENERATED_KEYS);
-            stmtVenda.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-            stmtVenda.setBigDecimal(2, totalVenda);
-            stmtVenda.setLong(3, usuarioLogado.getId());
-            stmtVenda.executeUpdate();
-
-            ResultSet keys = stmtVenda.getGeneratedKeys();
-            keys.next();
-            int vendaId = keys.getInt(1);
-
-            String sqlItem = "INSERT INTO vendaItens (vendaId, produtoId, descricao, precoUnitario, quantidade) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement stmtItem = conn.prepareStatement(sqlItem);
-
-            for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
-                String produtoStr = (String) carrinhoModel.getValueAt(i, 0);
-                int produtoId = Integer.parseInt(produtoStr.split(" - ")[0]);
-                int qtd = (int) carrinhoModel.getValueAt(i, 1);
-                BigDecimal preco = (BigDecimal) carrinhoModel.getValueAt(i, 2);
-
-                stmtItem.setInt(1, vendaId);
-                stmtItem.setInt(2, produtoId);
-                stmtItem.setString(3, produtoStr);
-                stmtItem.setBigDecimal(4, preco);
-                stmtItem.setInt(5, qtd);
-                stmtItem.executeUpdate();
-
-                PreparedStatement stmtUpdate = conn.prepareStatement("UPDATE produtos SET estoque = estoque - ? WHERE id=?");
-                stmtUpdate.setInt(1, qtd);
-                stmtUpdate.setInt(2, produtoId);
-                stmtUpdate.executeUpdate();
-            }
-
-            String sqlTrans = "INSERT INTO transacaoFinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, 'ENTRADA', ?)";
-            PreparedStatement stmtTrans = conn.prepareStatement(sqlTrans);
-            stmtTrans.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-            stmtTrans.setBigDecimal(2, totalVenda);
-            stmtTrans.setLong(3, usuarioLogado.getId());
-            stmtTrans.executeUpdate();
-
-            conn.commit();
-            JOptionPane.showMessageDialog(this, "Venda registrada com sucesso!");
-            dispose();
+    private void atualizarTotal() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
+            total = total.add((BigDecimal) carrinhoModel.getValueAt(i, 3));
         }
+        totalLabel.setText("Total: R$ " + total.setScale(2, BigDecimal.ROUND_HALF_UP));
     }
+
+    private void registrarVenda() throws SQLException {
+    try (Connection conn = Database.getConnection()) {
+        conn.setAutoCommit(false);
+
+        // Verifica se o usuário ainda existe
+        String sqlUser = "SELECT COUNT(*) FROM usuarios WHERE id=?";
+        PreparedStatement stmtUser = conn.prepareStatement(sqlUser);
+        stmtUser.setInt(1, usuarioLogado.getId());
+        ResultSet rsUser = stmtUser.executeQuery();
+        if (rsUser.next() && rsUser.getInt(1) == 0) {
+            JOptionPane.showMessageDialog(this, "Usuário logado não existe mais. Venda cancelada.", "Erro", JOptionPane.ERROR_MESSAGE);
+            conn.rollback();
+            return;
+        }
+
+        // Calcula total da venda
+        BigDecimal totalVenda = BigDecimal.ZERO;
+        for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
+            totalVenda = totalVenda.add((BigDecimal) carrinhoModel.getValueAt(i, 3));
+        }
+
+        // Inserir venda
+        String sqlVenda = "INSERT INTO vendas (data, valorTotal, usuarioId) VALUES (?, ?, ?)";
+        PreparedStatement stmtVenda = conn.prepareStatement(sqlVenda, Statement.RETURN_GENERATED_KEYS);
+        stmtVenda.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now()));
+        stmtVenda.setBigDecimal(2, totalVenda);
+        stmtVenda.setInt(3, usuarioLogado.getId());
+        stmtVenda.executeUpdate();
+
+        ResultSet keys = stmtVenda.getGeneratedKeys();
+        keys.next();
+        int vendaId = keys.getInt(1);
+
+        // Inserir itens da venda
+        String sqlItem = "INSERT INTO vendaItens (vendaId, produtoId, descricao, precoUnitario, quantidade) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement stmtItem = conn.prepareStatement(sqlItem);
+
+        for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
+            String produtoStr = (String) carrinhoModel.getValueAt(i, 0);
+            int produtoId = Integer.parseInt(produtoStr.split(" - ")[0]);
+            int qtd = (int) carrinhoModel.getValueAt(i, 1);
+            BigDecimal preco = (BigDecimal) carrinhoModel.getValueAt(i, 2);
+
+            stmtItem.setInt(1, vendaId);
+            stmtItem.setInt(2, produtoId);
+            stmtItem.setString(3, produtoStr);
+            stmtItem.setBigDecimal(4, preco);
+            stmtItem.setInt(5, qtd);
+            stmtItem.executeUpdate();
+
+            PreparedStatement stmtUpdate = conn.prepareStatement("UPDATE produtos SET estoque = estoque - ? WHERE id=?");
+            stmtUpdate.setInt(1, qtd);
+            stmtUpdate.setInt(2, produtoId);
+            stmtUpdate.executeUpdate();
+        }
+
+        // Transação financeira
+        String sqlTrans = "INSERT INTO transacaoFinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, 'ENTRADA', ?)";
+        PreparedStatement stmtTrans = conn.prepareStatement(sqlTrans);
+        stmtTrans.setTimestamp(1, Timestamp.valueOf(java.time.LocalDateTime.now()));
+        stmtTrans.setBigDecimal(2, totalVenda);
+        stmtTrans.setInt(3, usuarioLogado.getId());
+        stmtTrans.executeUpdate();
+
+        conn.commit();
+        JOptionPane.showMessageDialog(this, "Venda registrada com sucesso!");
+        dispose();
+
+        carregarProdutos(); // Atualiza combo de produtos
+    }
+}
+
 }

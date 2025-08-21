@@ -108,13 +108,26 @@ public class GerenciarUsuariosFrame extends JFrame {
 
         int id = (int) model.getValueAt(selectedRow, 0);
         int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja deletar este usuário?");
-        if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
 
         try (Connection conn = Database.getConnection()) {
-            String sql = "DELETE FROM usuarios WHERE id=?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
+            conn.setAutoCommit(false); 
+            
+            String desvincular = "UPDATE vendas SET usuarioId = NULL WHERE usuarioId = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(desvincular)) {
+                stmt.setInt(1, id);
+                stmt.executeUpdate();
+            }
+
+            String sql = "DELETE FROM usuarios WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, id);
+                stmt.executeUpdate();
+            }
+
+            conn.commit(); 
             model.removeRow(selectedRow);
             JOptionPane.showMessageDialog(this, "Usuário deletado com sucesso!");
         } catch (Exception e) {

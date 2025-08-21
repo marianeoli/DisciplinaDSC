@@ -45,6 +45,25 @@
                 <artifactId>itextpdf</artifactId>
                 <version>5.5.13.3</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>11.11.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-mysql</artifactId>
+                <version>11.11.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>8.0.33</version>
+            </dependency>
+
         </dependencies>
 
     <build>
@@ -57,6 +76,17 @@
                 <configuration>
                     <mainClass>HomePage.MerControleApp</mainClass>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>11.11.1</version> 
+                <configuration>
+                    <configFiles>
+                        <configFile>flyway.conf</configFile>
+                    </configFiles>
+                </configuration>                
             </plugin>
         </plugins>
     </build>

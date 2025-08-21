@@ -9,6 +9,13 @@ import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 public class RelatorioEstoqueFrame extends JFrame {
 
@@ -24,7 +31,7 @@ public class RelatorioEstoqueFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(new Color(34, 139, 120)); 
+        mainPanel.setBackground(new Color(34, 139, 120));
         add(mainPanel);
 
         JLabel titleLabel = new JLabel("📦 Relatório de Estoque", SwingConstants.CENTER);
@@ -113,6 +120,7 @@ public class RelatorioEstoqueFrame extends JFrame {
 
     private void carregarDados() {
         try (Connection conn = Database.getConnection()) {
+            // Agora todos os produtos, inclusive com estoque 0
             String sql = "SELECT id, codigo, nome, estoque, preco_venda FROM produtos ORDER BY estoque ASC";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
@@ -134,5 +142,65 @@ public class RelatorioEstoqueFrame extends JFrame {
     }
 
     private void exportarParaPDF() {
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setSelectedFile(new java.io.File("relatorio_estoque.pdf"));
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                String caminho = fileChooser.getSelectedFile().getAbsolutePath();
+
+                // Criar documento PDF
+                Document doc = new Document();
+                PdfWriter.getInstance(doc, new java.io.FileOutputStream(caminho));
+                doc.open();
+
+                // Fonte do título
+                com.itextpdf.text.Font tituloFont = com.itextpdf.text.FontFactory.getFont(
+                com.itextpdf.text.FontFactory.HELVETICA_BOLD, 18, com.itextpdf.text.BaseColor.BLACK);
+                Paragraph titulo = new Paragraph("📦 Relatório de Estoque\n\n", tituloFont);
+                titulo.setAlignment(Element.ALIGN_CENTER);
+                doc.add(titulo);
+
+                // Criar tabela PDF com mesmas colunas
+                PdfPTable tabelaPDF = new PdfPTable(model.getColumnCount());
+                tabelaPDF.setWidthPercentage(100);
+                tabelaPDF.setSpacingBefore(10f);
+                tabelaPDF.setSpacingAfter(10f);
+
+                // Cabeçalho
+                com.itextpdf.text.Font headFont = com.itextpdf.text.FontFactory.getFont(
+                        com.itextpdf.text.FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+                for (int i = 0; i < model.getColumnCount(); i++) {
+                    PdfPCell header = new PdfPCell(new Paragraph(model.getColumnName(i), headFont));
+                    header.setBackgroundColor(new BaseColor(0, 128, 0));
+                    header.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    header.setPadding(5);
+                    tabelaPDF.addCell(header);
+                }
+
+                // Dados da tabela
+                com.itextpdf.text.Font cellFont = com.itextpdf.text.FontFactory.getFont(
+                        com.itextpdf.text.FontFactory.HELVETICA, 11, BaseColor.BLACK);
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    for (int j = 0; j < model.getColumnCount(); j++) {
+                        PdfPCell cell = new PdfPCell(new Paragraph(model.getValueAt(i, j).toString(), cellFont));
+                        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        cell.setPadding(5);
+                        if (i % 2 == 0) {
+                            cell.setBackgroundColor(new BaseColor(230, 255, 230));
+                        }
+                        tabelaPDF.addCell(cell);
+                    }
+                }
+
+                doc.add(tabelaPDF);
+
+                doc.close();
+                JOptionPane.showMessageDialog(this, "PDF do estoque exportado com sucesso!");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao exportar PDF: " + ex.getMessage());
+        }
     }
+
 }
