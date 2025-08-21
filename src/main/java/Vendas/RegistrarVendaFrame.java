@@ -17,41 +17,81 @@ public class RegistrarVendaFrame extends JFrame {
     public RegistrarVendaFrame(Usuario usuarioLogado) {
         this.usuarioLogado = usuarioLogado;
         setTitle("Registrar Venda");
-        setSize(400, 200);
+        setSize(450, 250);
         setLocationRelativeTo(null);
-        setLayout(new GridBagLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+        // Painel principal com degradê verde MerControle
+        JPanel mainPanel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(
+                        0, 0, new Color(0x00A86B),
+                        0, getHeight(), new Color(0x006B46)
+                );
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        mainPanel.setOpaque(false);
+        add(mainPanel);
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5,5,5,5);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Título
+        JLabel titleLabel = new JLabel("💰 Registrar Venda", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setForeground(Color.WHITE);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        mainPanel.add(titleLabel, gbc);
+        gbc.gridwidth = 1;
+
         // Usuário logado
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        JLabel label = new JLabel("Usuário: " + usuarioLogado.getNome());
-        add(label, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
+        JLabel userLabel = new JLabel("Usuário: " + usuarioLogado.getNome(), SwingConstants.CENTER);
+        userLabel.setForeground(Color.WHITE);
+        mainPanel.add(userLabel, gbc);
         gbc.gridwidth = 1;
 
         // Produto
-        gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Produto:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 2;
+        JLabel produtoLabel = new JLabel("Produto:");
+        produtoLabel.setForeground(Color.WHITE);
+        mainPanel.add(produtoLabel, gbc);
+
         gbc.gridx = 1;
         produtoCombo = new JComboBox<>();
         carregarProdutos();
-        add(produtoCombo, gbc);
+        mainPanel.add(produtoCombo, gbc);
 
         // Quantidade
-        gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Quantidade:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 3;
+        JLabel quantidadeLabel = new JLabel("Quantidade:");
+        quantidadeLabel.setForeground(Color.WHITE);
+        mainPanel.add(quantidadeLabel, gbc);
+
         gbc.gridx = 1;
         quantidadeField = new JTextField(10);
-        add(quantidadeField, gbc);
+        mainPanel.add(quantidadeField, gbc);
 
         // Botão registrar
-        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        JButton registrarBtn = new JButton("Registrar Venda");
-        add(registrarBtn, gbc);
+        JButton registrarBtn = new JButton("🛒 Registrar Venda");
+        registrarBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        registrarBtn.setBackground(new Color(0x00A86B));
+        registrarBtn.setForeground(Color.WHITE);
+        registrarBtn.setFocusPainted(false);
+        registrarBtn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        mainPanel.add(registrarBtn, gbc);
 
         registrarBtn.addActionListener(e -> {
             try {
@@ -98,7 +138,6 @@ public class RegistrarVendaFrame extends JFrame {
         try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false); // transação
 
-            // 1. Verifica estoque e preço
             String sqlProduto = "SELECT preco_venda, estoque FROM produtos WHERE id=?";
             PreparedStatement stmtProd = conn.prepareStatement(sqlProduto);
             stmtProd.setInt(1, produtoId);
@@ -119,7 +158,6 @@ public class RegistrarVendaFrame extends JFrame {
 
             BigDecimal subtotal = precoVenda.multiply(BigDecimal.valueOf(quantidade));
 
-            // 2. Inserir venda
             String sqlVenda = "INSERT INTO vendas (produto_id, quantidade, valor_total, data_hora, usuario_id) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmtVenda = conn.prepareStatement(sqlVenda, Statement.RETURN_GENERATED_KEYS);
             stmtVenda.setInt(1, produtoId);
@@ -131,11 +169,8 @@ public class RegistrarVendaFrame extends JFrame {
 
             ResultSet keys = stmtVenda.getGeneratedKeys();
             int vendaId = 0;
-            if(keys.next()) {
-                vendaId = keys.getInt(1);
-            }
+            if(keys.next()) vendaId = keys.getInt(1);
 
-            // 3. Inserir item na tabela itens_venda
             String sqlItem = "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmtItem = conn.prepareStatement(sqlItem);
             stmtItem.setInt(1, vendaId);
@@ -145,14 +180,12 @@ public class RegistrarVendaFrame extends JFrame {
             stmtItem.setBigDecimal(5, subtotal);
             stmtItem.executeUpdate();
 
-            // 4. Atualiza estoque
             String sqlUpdate = "UPDATE produtos SET estoque=? WHERE id=?";
             PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate);
             stmtUpdate.setInt(1, estoqueAtual - quantidade);
             stmtUpdate.setInt(2, produtoId);
             stmtUpdate.executeUpdate();
 
-            // 5. Inserir transação financeira
             String sqlTrans = "INSERT INTO transacaoFinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, 'ENTRADA', ?)";
             PreparedStatement stmtTrans = conn.prepareStatement(sqlTrans);
             stmtTrans.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
