@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import HomePage.Database;
 
+
 public class GerenciaFinanceira {
 
     public void inserir(TransacaoFinanceira t, int usuarioId) {
-        String sql = "INSERT INTO transacao_financeira (data, valor, categoria, usuario_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO transacaoFinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, ?, ?)";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, new java.sql.Date(t.getData().getTime()));
@@ -23,7 +24,7 @@ public class GerenciaFinanceira {
 
     public List<TransacaoFinanceira> listarPorMesAno(int mes, int ano) {
         List<TransacaoFinanceira> lista = new ArrayList<>();
-        String sql = "SELECT * FROM transacao_financeira WHERE MONTH(data)=? AND YEAR(data)=?";
+        String sql = "SELECT * FROM transacaoFinanceira WHERE MONTH(data)=? AND YEAR(data)=?";
         try (Connection conn = Database.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, mes);
@@ -32,7 +33,7 @@ public class GerenciaFinanceira {
 
             while (rs.next()) {
                 TransacaoFinanceira t = new TransacaoFinanceira();
-                t.setCodigo(rs.getInt("id"));
+                t.setId(rs.getInt("id"));
                 t.setData(rs.getDate("data"));
                 t.setValor(rs.getFloat("valor"));
                 t.setCategoria(rs.getString("categoria"));

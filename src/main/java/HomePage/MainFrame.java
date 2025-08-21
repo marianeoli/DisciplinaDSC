@@ -115,9 +115,9 @@ public class MainFrame extends JFrame {
         cadastrarProduto.addActionListener(e -> new CadastroProdutoFrame().setVisible(true));
         listarProduto.addActionListener(e -> new GerenciarProdutosFrame("Administrador".equals(usuarioLogado.getTipo())).setVisible(true));
         novaVenda.addActionListener(e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true));
-        relFinanceiro.addActionListener(e -> new RelatorioEstoqueFrame().setVisible(true));
-        relFinanceiro.addActionListener(e -> new RelatorioFinanceiroFrame(10, 12).setVisible(true));
-        relFinanceiro.addActionListener(e -> new RelatorioVendasFrame().setVisible(true));
+        relEstoque.addActionListener(e -> new RelatorioEstoqueFrame().setVisible(true));
+        relFinanceiro.addActionListener(e -> new RelatorioFinanceiroFrame(8 ,2025).setVisible(true));
+        relVendas.addActionListener(e -> new RelatorioVendasFrame().setVisible(true));
     }
 
     public static void main(String[] args) {

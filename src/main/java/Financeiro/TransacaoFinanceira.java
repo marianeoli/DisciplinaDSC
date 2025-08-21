@@ -3,17 +3,17 @@ package Financeiro;
 import java.util.Date;
 
 public class TransacaoFinanceira {
-    private long codigo;
+    private long id;          // usar 'id' em vez de 'codigo'
     private Date data;
     private float valor;
     private String categoria;
 
-    public long getCodigo() {
-        return codigo;
+    public long getId() {
+        return id;
     }
 
-    public void setCodigo(long codigo) {
-        this.codigo = codigo;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Date getData() {

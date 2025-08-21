@@ -1,43 +1,106 @@
 package Relatorios;
 
-import Financeiro.GerenciaFinanceira;
+import HomePage.Database;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.List;
-import Financeiro.TransacaoFinanceira;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Date;
 
 public class RelatorioFinanceiroFrame extends JFrame {
 
     private JTable tabela;
+    private DefaultTableModel model;
     private JLabel lblSaldo;
 
     public RelatorioFinanceiroFrame(int mes, int ano) {
         setTitle("Relatório Financeiro - " + mes + "/" + ano);
-        setSize(600, 400);
+        setSize(800, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Código correto:
-        GerenciaFinanceira dao = new GerenciaFinanceira();
-        List<TransacaoFinanceira> transacoes = dao.listarPorMesAno(mes, ano);
-
-        String[] colunas = {"Código", "Data", "Valor", "Categoria"};
-        Object[][] dados = new Object[transacoes.size()][4];
-        for (int i = 0; i < transacoes.size(); i++) {
-            TransacaoFinanceira t = transacoes.get(i);
-            dados[i][0] = t.getCodigo();
-            dados[i][1] = t.getData();
-            dados[i][2] = t.getValor();
-            dados[i][3] = t.getCategoria();
-        }
-
-        tabela = new JTable(dados, colunas);
+        // Colunas: Tipo, ID, Data, Descrição, Valor
+        model = new DefaultTableModel(new String[]{"Tipo", "ID", "Data", "Descrição", "Valor"}, 0);
+        tabela = new JTable(model);
         JScrollPane scroll = new JScrollPane(tabela);
-
-        float saldo = dao.calcularSaldo(mes, ano);
-        lblSaldo = new JLabel("Saldo do mês: R$ " + saldo);
-
         add(scroll, BorderLayout.CENTER);
+
+        carregarVendas(mes, ano);
+        carregarSaidas(mes, ano);
+
+        float saldo = calcularSaldo();
+        lblSaldo = new JLabel("Saldo do mês: R$ " + saldo);
+        lblSaldo.setFont(new Font("Arial", Font.BOLD, 16));
         add(lblSaldo, BorderLayout.SOUTH);
+    }
+
+    private void carregarVendas(int mes, int ano) {
+        try (Connection conn = Database.getConnection()) {
+            String sql = "SELECT v.id, v.data_hora, SUM(iv.quantidade * iv.preco_unitario) AS total_venda " +
+                         "FROM vendas v " +
+                         "JOIN itens_venda iv ON v.id = iv.venda_id " +
+                         "WHERE MONTH(v.data_hora)=? AND YEAR(v.data_hora)=? " +
+                         "GROUP BY v.id, v.data_hora " +
+                         "ORDER BY v.data_hora ASC";
+            
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, mes);
+            stmt.setInt(2, ano);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int idVenda = rs.getInt("id");
+                Date data = rs.getDate("data_hora");
+                float totalVenda = rs.getFloat("total_venda");
+
+                // Tipo = "ENTRADA"
+                model.addRow(new Object[]{"ENTRADA", idVenda, data, "Venda de produtos", totalVenda});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao carregar vendas: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void carregarSaidas(int mes, int ano) {
+        try (Connection conn = Database.getConnection()) {
+            String sql = "SELECT id, data, valor FROM transacaoFinanceira " +
+                         "WHERE categoria='SAIDA' AND MONTH(data)=? AND YEAR(data)=? " +
+                         "ORDER BY data ASC";
+
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, mes);
+            stmt.setInt(2, ano);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                Date data = rs.getDate("data");
+                float valor = rs.getFloat("valor");
+
+                model.addRow(new Object[]{"SAIDA", id, data, "Saída financeira", valor});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private float calcularSaldo() {
+        float saldo = 0;
+        for (int i = 0; i < model.getRowCount(); i++) {
+            String tipo = (String) model.getValueAt(i, 0);
+            float valor = ((Number) model.getValueAt(i, 4)).floatValue();
+
+            if (tipo.equals("ENTRADA")) {
+                saldo += valor;
+            } else if (tipo.equals("SAIDA")) {
+                saldo -= valor;
+            }
+        }
+        return saldo;
     }
 }

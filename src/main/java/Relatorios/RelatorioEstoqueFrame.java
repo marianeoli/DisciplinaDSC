@@ -30,8 +30,9 @@ public class RelatorioEstoqueFrame extends JFrame {
 
     private void carregarDados() {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT id, codigo, nome, quantidade, preco_venda " +
-                         "FROM produtos ORDER BY quantidade ASC";
+            String sql = "SELECT id, codigo, nome, estoque, preco_venda " +
+                         "FROM produtos ORDER BY estoque ASC"; // usar estoque
+
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
@@ -41,7 +42,7 @@ public class RelatorioEstoqueFrame extends JFrame {
                         rs.getInt("id"),
                         rs.getString("codigo"),
                         rs.getString("nome"),
-                        rs.getInt("quantidade"),
+                        rs.getInt("estoque"), // corrigido
                         rs.getDouble("preco_venda")
                 });
             }

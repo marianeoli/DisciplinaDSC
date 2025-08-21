@@ -28,13 +28,13 @@ public class RelatorioVendasFrame extends JFrame {
         carregarDados();
     }
 
-    private void carregarDados() {
+        private void carregarDados() {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT v.id, v.data, p.nome AS produto, iv.quantidade, iv.subtotal " +
+            String sql = "SELECT v.id, v.data_hora, p.nome AS produto, v.quantidade, v.valor_total " +
                          "FROM vendas v " +
-                         "JOIN itens_venda iv ON v.id = iv.venda_id " +
-                         "JOIN produtos p ON iv.produto_id = p.id " +
-                         "ORDER BY v.data DESC";
+                         "JOIN produtos p ON v.produto_id = p.id " +
+                         "ORDER BY v.data_hora DESC";
+
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
@@ -42,10 +42,10 @@ public class RelatorioVendasFrame extends JFrame {
             while (rs.next()) {
                 model.addRow(new Object[]{
                         rs.getInt("id"),
-                        rs.getDate("data"),
+                        rs.getTimestamp("data_hora"),
                         rs.getString("produto"),
                         rs.getInt("quantidade"),
-                        rs.getDouble("subtotal")
+                        rs.getDouble("valor_total")
                 });
             }
         } catch (Exception e) {
