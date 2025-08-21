@@ -37,16 +37,15 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.WHITE); // Fundo branco
+        mainPanel.setBackground(Color.WHITE); 
 
-        // --- Faixa verde na parte superior ---
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(VERDE_ESCURO);
         headerPanel.setLayout(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
 
         JLabel welcomeLabel = new JLabel("Bem-vindo(a) ao MerControle, " + usuarioLogado.getNome() + "!");
-        welcomeLabel.setFont(new Font("Inter", Font.BOLD, 36)); // Fonte moderna
+        welcomeLabel.setFont(new Font("Inter", Font.BOLD, 36)); 
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         headerPanel.add(welcomeLabel, BorderLayout.CENTER);
@@ -58,16 +57,16 @@ public class MainFrame extends JFrame {
         buttonGridPanel.setBorder(BorderFactory.createEmptyBorder(60, 80, 20, 80));
 
         if ("Administrador".equalsIgnoreCase(usuarioLogado.getTipo())) {
-            buttonGridPanel.add(criarBotaoAtalho("👤 Gestão de Usuários", "icons/user.png", e -> new GerenciarUsuariosFrame().setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("🛍️ Controle de Produtos", "icons/product.png", e -> new GerenciarProdutosFrame(true).setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("🛒 Registro de Vendas", "icons/sale.png", e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("➕ Novo Usuário", "icons/add_user.png", e -> new CadastroUsuarioFrame().setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("📦 Novo Produto", "icons/add_product.png", e -> new CadastroProdutoFrame().setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("💰 Registro Financeiro", "icons/finance.png", e -> new CadastroTransacaoFrame(usuarioLogado).setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("👤 Gestão de Usuários", e -> new GerenciarUsuariosFrame().setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("🛍️ Controle de Produtos", e -> new GerenciarProdutosFrame(true).setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("🛒 Registro de Vendas", e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("➕ Novo Usuário", e -> new CadastroUsuarioFrame().setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("📦 Novo Produto", e -> new CadastroProdutoFrame().setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("💰 Registro Financeiro", e -> new CadastroTransacaoFrame(usuarioLogado).setVisible(true)));
         } else if ("Funcionario".equalsIgnoreCase(usuarioLogado.getTipo())) {
-            buttonGridPanel.add(criarBotaoAtalho("🛍️ Controle de Produtos", "icons/product.png", e -> new GerenciarProdutosFrame(true).setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("🛒 Registro de Vendas", "icons/sale.png", e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true)));
-            buttonGridPanel.add(criarBotaoAtalho("📦 Relatório de Estoque", "icons/stock.png", e -> new RelatorioEstoqueFrame().setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("🛍️ Controle de Produtos", e -> new GerenciarProdutosFrame(true).setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("🛒 Registro de Vendas", e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true)));
+            buttonGridPanel.add(criarBotaoAtalho("📦 Relatório de Estoque", e -> new RelatorioEstoqueFrame().setVisible(true)));
             buttonGridPanel.add(new JPanel() {{ setBackground(Color.WHITE); }});
             buttonGridPanel.add(new JPanel() {{ setBackground(Color.WHITE); }});
             buttonGridPanel.add(new JPanel() {{ setBackground(Color.WHITE); }});
@@ -78,10 +77,10 @@ public class MainFrame extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
         bottomPanel.setBackground(Color.WHITE);
 
-        JButton relatoriosButton = criarBotaoAcao("📊 Relatórios", null, new Color(41, 128, 185)); 
+        JButton relatoriosButton = criarBotaoAcao("📊 Relatórios", new Color(41, 128, 185)); 
         relatoriosButton.addActionListener(e -> abrirRelatorios());
         
-        JButton sairButton = criarBotaoAcao("🚪 Sair", null, new Color(231, 76, 60));
+        JButton sairButton = criarBotaoAcao("🚪 Sair", new Color(231, 76, 60));
         sairButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                     this,
@@ -103,14 +102,8 @@ public class MainFrame extends JFrame {
         add(mainPanel);
     }
 
-    private JButton criarBotaoAtalho(String texto, String caminhoIcone, java.awt.event.ActionListener acao) {
-        ImageIcon originalIcon = new ImageIcon(caminhoIcone);
-        Image scaledImage = originalIcon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        JButton botao = new JButton("<html><center>" + texto.replace(" ", "<br>") + "</center></html>", scaledIcon);
-        botao.setVerticalTextPosition(SwingConstants.BOTTOM);
-        botao.setHorizontalTextPosition(SwingConstants.CENTER);
+    private JButton criarBotaoAtalho(String texto, java.awt.event.ActionListener acao) {
+        JButton botao = new JButton("<html><center>" + texto.replace(" ", "<br>") + "</center></html>");
         botao.setFont(new Font("Inter", Font.BOLD, 18));
         botao.setForeground(Color.WHITE);
         botao.setBackground(VERDE_ESCURO);
@@ -133,12 +126,8 @@ public class MainFrame extends JFrame {
         return botao;
     }
 
-    private JButton criarBotaoAcao(String texto, String caminhoIcone, Color cor) {
-        ImageIcon originalIcon = new ImageIcon(caminhoIcone);
-        Image scaledImage = originalIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        JButton botao = new JButton(texto, scaledIcon);
+    private JButton criarBotaoAcao(String texto, Color cor) {
+        JButton botao = new JButton(texto);
         botao.setFont(new Font("Inter", Font.BOLD, 16)); 
         botao.setForeground(Color.WHITE);
         botao.setBackground(cor);
