@@ -17,16 +17,20 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 
 public class RelatorioFinanceiroFrame extends JFrame {
 
     private JTable tabela;
     private DefaultTableModel model;
     private JLabel lblSaldo;
+    private JComboBox<String> filtroTipo;
+    private JTextField filtroDescricao;
 
     public RelatorioFinanceiroFrame(int mes, int ano) {
         setTitle("Relatório Financeiro - " + mes + "/" + ano);
-        setSize(800, 500);
+        setSize(900, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -39,6 +43,25 @@ public class RelatorioFinanceiroFrame extends JFrame {
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
+
+        JPanel filtroPanel = new JPanel();
+        filtroPanel.setBackground(Color.WHITE);
+        filtroPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        filtroPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        filtroPanel.add(new JLabel("Tipo:"));
+        filtroTipo = new JComboBox<>(new String[]{"TODOS", "ENTRADA", "SAIDA"});
+        filtroPanel.add(filtroTipo);
+
+        filtroPanel.add(new JLabel("Descrição:"));
+        filtroDescricao = new JTextField(20);
+        filtroPanel.add(filtroDescricao);
+
+        JButton btnFiltrar = new JButton("Filtrar");
+        btnFiltrar.addActionListener(e -> aplicarFiltro());
+        filtroPanel.add(btnFiltrar);
+
+        mainPanel.add(filtroPanel, BorderLayout.NORTH);
 
         model = new DefaultTableModel(new String[]{"ID", "Data", "Tipo", "Descrição", "Valor"}, 0);
         tabela = new JTable(model);
@@ -112,6 +135,30 @@ public class RelatorioFinanceiroFrame extends JFrame {
         }
     }
 
+    private void aplicarFiltro() {
+        String tipoSelecionado = filtroTipo.getSelectedItem().toString();
+        String descFiltro = filtroDescricao.getText().trim().toLowerCase();
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        tabela.setRowSorter(sorter);
+
+        java.util.List<RowFilter<Object, Object>> filtros = new java.util.ArrayList<>();
+
+        if (!tipoSelecionado.equals("TODOS")) {
+            filtros.add(RowFilter.regexFilter(tipoSelecionado, 2));
+        }
+        if (!descFiltro.isEmpty()) {
+            filtros.add(RowFilter.regexFilter("(?i)" + descFiltro, 3));
+        }
+
+        if (filtros.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.andFilter(filtros));
+        }
+    }
+
+
     private float calcularSaldo() {
         float saldo = 0;
         for (int i = 0; i < model.getRowCount(); i++) {
@@ -161,6 +208,9 @@ public class RelatorioFinanceiroFrame extends JFrame {
                 com.itextpdf.text.Font cellFont = com.itextpdf.text.FontFactory.getFont(
                         com.itextpdf.text.FontFactory.HELVETICA, 11, com.itextpdf.text.BaseColor.BLACK);
                 for (int i = 0; i < model.getRowCount(); i++) {
+                    if (tabela.getRowHeight(i) == 0) {
+                        continue;
+                    }
                     for (int j = 0; j < model.getColumnCount(); j++) {
                         PdfPCell cell = new PdfPCell(new Paragraph(model.getValueAt(i, j).toString(), cellFont));
                         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
