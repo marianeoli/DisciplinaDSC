@@ -1,49 +1,22 @@
 package Vendas;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class Venda {
-    private int id;
-    private int produtoId;
-    private int quantidade;
-    private BigDecimal valorTotal;
-    private LocalDateTime dataHora;
+    private long codigo;
+    private Date data;
+    private float valorTotal;
+    private long usuarioId;
 
-    // Getters e Setters
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+    public long getCodigo() { return codigo; }
+    public void setCodigo(long codigo) { this.codigo = codigo; }
 
-    public int getProdutoId() {
-        return produtoId;
-    }
-    public void setProdutoId(int produtoId) {
-        this.produtoId = produtoId;
-    }
+    public Date getData() { return data; }
+    public void setData(Date data) { this.data = data; }
 
-    public int getQuantidade() {
-        return quantidade;
-    }
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-    }
+    public float getValorTotal() { return valorTotal; }
+    public void setValorTotal(float valorTotal) { this.valorTotal = valorTotal; }
 
-    public BigDecimal getValorTotal() {
-        return valorTotal;
-    }
-    public void setValorTotal(BigDecimal valorTotal) {
-        this.valorTotal = valorTotal;
-    }
-
-    public LocalDateTime getDataHora() {
-        return dataHora;
-    }
-    public void setDataHora(LocalDateTime dataHora) {
-        this.dataHora = dataHora;
-    }
+    public long getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(long usuarioId) { this.usuarioId = usuarioId; }
 }
-
