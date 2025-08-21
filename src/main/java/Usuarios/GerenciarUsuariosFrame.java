@@ -1,19 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Usuarios;
 
-/**
- *
- * @author mariane
- */
 import HomePage.Database;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
-
 
 public class GerenciarUsuariosFrame extends JFrame {
 
@@ -22,27 +13,47 @@ public class GerenciarUsuariosFrame extends JFrame {
 
     public GerenciarUsuariosFrame() {
         setTitle("Gerenciar Usuários");
-        setSize(600, 400);
+        setSize(650, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        // Painel principal verde
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(34, 139, 120)); // verde moderno
+        add(mainPanel);
+
+        // Título
+        JLabel titleLabel = new JLabel("👥 Gerenciar Usuários", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+
+        // Tabela com scroll
         model = new DefaultTableModel(new String[]{"ID", "Nome", "Login", "Tipo"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column != 0; // ID não pode ser editado
+                return column != 0; // ID não editável
             }
         };
-
         table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Painel de botões
         JPanel buttonPanel = new JPanel();
-        JButton atualizarBtn = new JButton("Atualizar");
-        JButton deletarBtn = new JButton("Deletar");
+        buttonPanel.setBackground(new Color(34, 139, 120)); // mesmo verde
+        JButton atualizarBtn = new JButton("🔄 Atualizar");
+        JButton deletarBtn = new JButton("❌ Deletar");
+        atualizarBtn.setBackground(new Color(34, 139, 120));
+        atualizarBtn.setForeground(Color.WHITE);
+        atualizarBtn.setFocusPainted(false);
+        deletarBtn.setBackground(new Color(34, 139, 120));
+        deletarBtn.setForeground(Color.WHITE);
+        deletarBtn.setFocusPainted(false);
         buttonPanel.add(atualizarBtn);
         buttonPanel.add(deletarBtn);
-        add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Carrega os usuários do banco
         carregarUsuarios();
