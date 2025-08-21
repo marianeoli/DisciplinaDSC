@@ -39,12 +39,12 @@ public class RelatorioFinanceiroFrame extends JFrame {
 
     private void carregarVendas(int mes, int ano) {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT v.id, v.data_hora, SUM(iv.quantidade * iv.preco_unitario) AS total_venda " +
-                         "FROM vendas v " +
-                         "JOIN itens_venda iv ON v.id = iv.venda_id " +
-                         "WHERE MONTH(v.data_hora)=? AND YEAR(v.data_hora)=? " +
-                         "GROUP BY v.id, v.data_hora " +
-                         "ORDER BY v.data_hora ASC";
+            String sql = "SELECT v.id, v.data, SUM(iv.quantidade * iv.precoUnitario) AS total_venda " +
+                         "FROM vendaItens iv " +
+                         "JOIN VendaItens iv ON v.id = iv.vendaId " +
+                         "WHERE MONTH(v.data)=? AND YEAR(v.data)=? " +
+                         "GROUP BY v.id, v.data " +
+                         "ORDER BY v.data ASC";
             
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, mes);
@@ -53,7 +53,7 @@ public class RelatorioFinanceiroFrame extends JFrame {
 
             while (rs.next()) {
                 int idVenda = rs.getInt("id");
-                Date data = rs.getDate("data_hora");
+                Date data = rs.getDate("data");
                 float totalVenda = rs.getFloat("total_venda");
 
                 // Tipo = "ENTRADA"

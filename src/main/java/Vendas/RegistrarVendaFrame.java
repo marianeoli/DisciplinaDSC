@@ -119,7 +119,7 @@ public class RegistrarVendaFrame extends JFrame {
 
     private void carregarProdutos() {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT id, nome, preco_venda FROM produto";
+            String sql = "SELECT id, nome, preco_venda FROM produtos";
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -139,7 +139,7 @@ public class RegistrarVendaFrame extends JFrame {
         int produtoId = Integer.parseInt(produtoSelecionado.split(" - ")[0]);
 
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT nome, preco_venda, estoque FROM produto WHERE id=?";
+            String sql = "SELECT nome, preco_venda, estoque FROM produtos WHERE id=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, produtoId);
             ResultSet rs = stmt.executeQuery();
@@ -186,7 +186,7 @@ public class RegistrarVendaFrame extends JFrame {
             int vendaId = keys.getInt(1);
 
             // 3. Insere itens e atualiza estoque
-            String sqlItem = "INSERT INTO venda_itens (venda_id, produto_id, descricao, preco_unitario, quantidade) VALUES (?, ?, ?, ?, ?)";
+            String sqlItem = "INSERT INTO vendaItens (vendaId, produtoId, descricao, preco_unitario, quantidade) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmtItem = conn.prepareStatement(sqlItem);
 
             for (int i = 0; i < carrinhoModel.getRowCount(); i++) {

@@ -30,10 +30,10 @@ public class RelatorioVendasFrame extends JFrame {
 
         private void carregarDados() {
         try (Connection conn = Database.getConnection()) {
-            String sql = "SELECT v.id, v.data_hora, p.nome AS produto, v.quantidade, v.valor_total " +
+            String sql = "SELECT v.id, v.data, p.nome AS produto, v.quantidade, v.valor_total " +
                          "FROM vendas v " +
                          "JOIN produtos p ON v.produto_id = p.id " +
-                         "ORDER BY v.data_hora DESC";
+                         "ORDER BY v.data DESC";
 
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
