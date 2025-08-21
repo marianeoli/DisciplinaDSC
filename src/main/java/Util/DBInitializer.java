@@ -25,10 +25,9 @@ public class DBInitializer {
                 line = line.trim();
                 if (!line.startsWith("--") && !line.isEmpty()) {
                     sql.append(line);
-                    // Executa cada comando quando encontrar ';'
                     if (line.endsWith(";")) {
                         stmt.execute(sql.toString());
-                        sql.setLength(0); // limpa o buffer
+                        sql.setLength(0);
                     }
                 }
             }

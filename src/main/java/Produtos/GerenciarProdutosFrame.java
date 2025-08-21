@@ -28,8 +28,8 @@ public class GerenciarProdutosFrame extends JFrame {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gp = new GradientPaint(
-                        0, 0, new Color(0, 100, 0),   // verde escuro
-                        getWidth(), getHeight(), new Color(144, 238, 144) // verde claro
+                        0, 0, new Color(0, 100, 0),
+                        getWidth(), getHeight(), new Color(144, 238, 144) 
                 );
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());

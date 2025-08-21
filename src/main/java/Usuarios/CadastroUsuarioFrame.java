@@ -19,7 +19,6 @@ public class CadastroUsuarioFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Painel principal com degradê verde MerControle
         JPanel mainPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -41,7 +40,6 @@ public class CadastroUsuarioFrame extends JFrame {
         gbc.insets = new Insets(10,10,10,10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Título
         JLabel titleLabel = new JLabel("➕ Cadastro de Usuário", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
@@ -52,7 +50,6 @@ public class CadastroUsuarioFrame extends JFrame {
 
         gbc.gridwidth = 1;
 
-        // Nome
         gbc.gridx = 0; gbc.gridy = 1;
         JLabel nomeLabel = new JLabel("Nome:");
         nomeLabel.setForeground(Color.WHITE);
@@ -62,7 +59,6 @@ public class CadastroUsuarioFrame extends JFrame {
         nomeField = new JTextField(20);
         mainPanel.add(nomeField, gbc);
 
-        // Login
         gbc.gridx = 0; gbc.gridy = 2;
         JLabel loginLabel = new JLabel("Login:");
         loginLabel.setForeground(Color.WHITE);
@@ -72,7 +68,6 @@ public class CadastroUsuarioFrame extends JFrame {
         loginField = new JTextField(20);
         mainPanel.add(loginField, gbc);
 
-        // Senha
         gbc.gridx = 0; gbc.gridy = 3;
         JLabel senhaLabel = new JLabel("Senha:");
         senhaLabel.setForeground(Color.WHITE);
@@ -82,7 +77,6 @@ public class CadastroUsuarioFrame extends JFrame {
         senhaField = new JPasswordField(20);
         mainPanel.add(senhaField, gbc);
 
-        // Tipo
         gbc.gridx = 0; gbc.gridy = 4;
         JLabel tipoLabel = new JLabel("Tipo:");
         tipoLabel.setForeground(Color.WHITE);
@@ -92,7 +86,6 @@ public class CadastroUsuarioFrame extends JFrame {
         tipoCombo = new JComboBox<>(new String[]{"Administrador","Funcionario"});
         mainPanel.add(tipoCombo, gbc);
 
-        // Botão salvar
         gbc.gridx = 0; gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;

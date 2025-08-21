@@ -5,7 +5,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 public class MerControleApp {
     public static void main(String[] args) {
-        // Define tema FlatLaf
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception e) {

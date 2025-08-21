@@ -9,6 +9,7 @@ import Usuarios.Usuario;
 import Relatorios.RelatorioEstoqueFrame;
 import Relatorios.RelatorioFinanceiroFrame;
 import Relatorios.RelatorioVendasFrame;
+import Financeiro.CadastroTransacaoFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,8 +44,8 @@ public class MainFrame extends JFrame {
         mainPanel.add(criarBotaoAtalho("🛒 Vendas", e -> new RegistrarVendaFrame(usuarioLogado).setVisible(true)));
         mainPanel.add(criarBotaoAtalho("➕ Novo Produto", e -> new CadastroProdutoFrame().setVisible(true)));
         mainPanel.add(criarBotaoAtalho("➕ Novo Usuário", e -> new CadastroUsuarioFrame().setVisible(true)));
-        mainPanel.add(criarBotaoAtalho("📊 Relatórios", e -> {
-            
+        mainPanel.add(criarBotaoAtalho("💰 Nova Transação", e -> new CadastroTransacaoFrame(usuarioLogado).setVisible(true)));
+        mainPanel.add(criarBotaoAtalho("📊 Relatórios", e -> {            
             Object[] opcoes = {"📦 Estoque", "💵 Financeiro", "🛒 Vendas"};
             String escolha = (String) JOptionPane.showInputDialog(
                     this,
@@ -55,6 +56,7 @@ public class MainFrame extends JFrame {
                     opcoes,
                     opcoes[0]
             );
+       
             if (escolha != null) {
                 switch (escolha) {
                     case "📦 Estoque" -> new RelatorioEstoqueFrame().setVisible(true);
