@@ -26,7 +26,6 @@ public class RegistrarVendaFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        
         JPanel mainPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -48,7 +47,6 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        
         JLabel titleLabel = new JLabel("💰 Registrar Venda", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
@@ -58,14 +56,12 @@ public class RegistrarVendaFrame extends JFrame {
         mainPanel.add(titleLabel, gbc);
         gbc.gridwidth = 1;
 
-        
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
         JLabel userLabel = new JLabel("Usuário: " + usuarioLogado.getNome(), SwingConstants.CENTER);
         userLabel.setForeground(Color.WHITE);
         mainPanel.add(userLabel, gbc);
         gbc.gridwidth = 1;
 
-      
         gbc.gridx = 0; gbc.gridy = 2;
         JLabel produtoLabel = new JLabel("Produto:");
         produtoLabel.setForeground(Color.WHITE);
@@ -76,7 +72,6 @@ public class RegistrarVendaFrame extends JFrame {
         carregarProdutos();
         mainPanel.add(produtoCombo, gbc);
 
-        // Quantidade
         gbc.gridx = 0; gbc.gridy = 3;
         JLabel quantidadeLabel = new JLabel("Quantidade:");
         quantidadeLabel.setForeground(Color.WHITE);
@@ -86,8 +81,6 @@ public class RegistrarVendaFrame extends JFrame {
         quantidadeField = new JTextField(10);
         mainPanel.add(quantidadeField, gbc);
 
-
-        // Botões
         JButton addProdutoBtn = new JButton("Adicionar Produto");
         gbc.gridx = 0; gbc.gridy = 4;
         gbc.gridwidth = 1;
@@ -97,7 +90,6 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.gridx = 1; gbc.gridy = 4;
         mainPanel.add(finalizarBtn, gbc);
 
-        // Tabela carrinho
         carrinhoModel = new DefaultTableModel(new Object[]{"Produto", "Qtd", "Preço", "Subtotal"}, 0);
         carrinhoTable = new JTable(carrinhoModel);
         JScrollPane scroll = new JScrollPane(carrinhoTable);
@@ -106,7 +98,6 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.weighty = 1;
         mainPanel.add(scroll, gbc);
 
-        // Ações
         addProdutoBtn.addActionListener(e -> adicionarProduto());
         finalizarBtn.addActionListener(e -> {
             try {
@@ -168,14 +159,12 @@ public class RegistrarVendaFrame extends JFrame {
         try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false);
 
-            // 1. Calcula total
             BigDecimal totalVenda = BigDecimal.ZERO;
             for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
                 totalVenda = totalVenda.add((BigDecimal) carrinhoModel.getValueAt(i, 3));
             }
 
-            // 2. Insere venda
-            String sqlVenda = "INSERT INTO venda (data, valor_total, usuario_id) VALUES (?, ?, ?)";
+            String sqlVenda = "INSERT INTO vendas (data, valorTotal, usuarioId) VALUES (?, ?, ?)";
             PreparedStatement stmtVenda = conn.prepareStatement(sqlVenda, Statement.RETURN_GENERATED_KEYS);
             stmtVenda.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             stmtVenda.setBigDecimal(2, totalVenda);
@@ -186,8 +175,7 @@ public class RegistrarVendaFrame extends JFrame {
             keys.next();
             int vendaId = keys.getInt(1);
 
-            // 3. Insere itens e atualiza estoque
-            String sqlItem = "INSERT INTO vendaItens (vendaId, produtoId, descricao, preco_unitario, quantidade) VALUES (?, ?, ?, ?, ?)";
+            String sqlItem = "INSERT INTO vendaItens (vendaId, produtoId, descricao, precoUnitario, quantidade) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement stmtItem = conn.prepareStatement(sqlItem);
 
             for (int i = 0; i < carrinhoModel.getRowCount(); i++) {
@@ -203,14 +191,13 @@ public class RegistrarVendaFrame extends JFrame {
                 stmtItem.setInt(5, qtd);
                 stmtItem.executeUpdate();
 
-                PreparedStatement stmtUpdate = conn.prepareStatement("UPDATE produto SET estoque = estoque - ? WHERE id=?");
+                PreparedStatement stmtUpdate = conn.prepareStatement("UPDATE produtos SET estoque = estoque - ? WHERE id=?");
                 stmtUpdate.setInt(1, qtd);
                 stmtUpdate.setInt(2, produtoId);
                 stmtUpdate.executeUpdate();
             }
 
-            // 4. Insere transação financeira
-            String sqlTrans = "INSERT INTO transacaofinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, 'ENTRADA', ?)";
+            String sqlTrans = "INSERT INTO transacaoFinanceira (data, valor, categoria, usuario_id) VALUES (?, ?, 'ENTRADA', ?)";
             PreparedStatement stmtTrans = conn.prepareStatement(sqlTrans);
             stmtTrans.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             stmtTrans.setBigDecimal(2, totalVenda);

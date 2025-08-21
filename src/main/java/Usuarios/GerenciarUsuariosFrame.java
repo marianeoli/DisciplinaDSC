@@ -17,19 +17,16 @@ public class GerenciarUsuariosFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // Painel principal verde
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(new Color(34, 139, 120)); // verde moderno
         add(mainPanel);
 
-        // Título
         JLabel titleLabel = new JLabel("👥 Gerenciar Usuários", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Tabela com scroll
         model = new DefaultTableModel(new String[]{"ID", "Nome", "Login", "Tipo"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -40,7 +37,6 @@ public class GerenciarUsuariosFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Painel de botões
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(34, 139, 120)); // mesmo verde
         JButton atualizarBtn = new JButton("🔄 Atualizar");
@@ -55,10 +51,8 @@ public class GerenciarUsuariosFrame extends JFrame {
         buttonPanel.add(deletarBtn);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Carrega os usuários do banco
         carregarUsuarios();
 
-        // Botões
         atualizarBtn.addActionListener(e -> atualizarUsuarios());
         deletarBtn.addActionListener(e -> deletarUsuario());
     }

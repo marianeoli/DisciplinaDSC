@@ -5,14 +5,9 @@ import java.io.IOException;
 
 public class DBSnapshot {
 
-    /**
-     * Gera um dump do banco MySQL usando mysqldump
-     * O arquivo será sempre chamado "mercontrole_backup_atual.sql" na raiz do projeto
-     */
     public static void gerarDump() {
-        String usuario = "root";   // seu usuário MySQL
-        String senha = "1234";     // sua senha MySQL
-
+        String usuario = "root";  
+        String senha = "1234";    
 
         String caminhoArquivo = "/mercontrole_backup_atual.sql";
 
@@ -25,7 +20,7 @@ public class DBSnapshot {
                 caminhoArquivo
         );
 
-        pb.redirectErrorStream(true); // redireciona erros para o output
+        pb.redirectErrorStream(true); 
 
         try {
             Process processo = pb.start();

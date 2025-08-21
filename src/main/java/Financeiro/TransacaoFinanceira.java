@@ -3,7 +3,7 @@ package Financeiro;
 import java.util.Date;
 
 public class TransacaoFinanceira {
-    private long id;          // usar 'id' em vez de 'codigo'
+    private long id;
     private Date data;
     private float valor;
     private String categoria;
