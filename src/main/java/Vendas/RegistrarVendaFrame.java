@@ -26,7 +26,7 @@ public class RegistrarVendaFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Painel principal com degradê verde MerControle
+        
         JPanel mainPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -48,7 +48,7 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Título
+        
         JLabel titleLabel = new JLabel("💰 Registrar Venda", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
@@ -58,14 +58,14 @@ public class RegistrarVendaFrame extends JFrame {
         mainPanel.add(titleLabel, gbc);
         gbc.gridwidth = 1;
 
-        // Usuário logado
+        
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2;
         JLabel userLabel = new JLabel("Usuário: " + usuarioLogado.getNome(), SwingConstants.CENTER);
         userLabel.setForeground(Color.WHITE);
         mainPanel.add(userLabel, gbc);
         gbc.gridwidth = 1;
 
-        // Produto
+      
         gbc.gridx = 0; gbc.gridy = 2;
         JLabel produtoLabel = new JLabel("Produto:");
         produtoLabel.setForeground(Color.WHITE);
@@ -85,6 +85,7 @@ public class RegistrarVendaFrame extends JFrame {
         gbc.gridx = 1;
         quantidadeField = new JTextField(10);
         mainPanel.add(quantidadeField, gbc);
+
 
         // Botões
         JButton addProdutoBtn = new JButton("Adicionar Produto");
