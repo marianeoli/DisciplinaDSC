@@ -1,7 +1,6 @@
 package Relatorios;
 
 import HomePage.Database;
-
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -12,24 +11,24 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import javax.swing.table.TableRowSorter;
-import javax.swing.RowFilter;
 
 public class RelatorioFinanceiroFrame extends JFrame {
 
     private JTable tabela;
     private DefaultTableModel model;
-    private JLabel lblSaldo;
-    private JComboBox<String> filtroTipo;
     private JTextField filtroDescricao;
+    private JComboBox<String> filtroTipo;
+    private TableRowSorter<DefaultTableModel> rowSorter;
 
     public RelatorioFinanceiroFrame(int mes, int ano) {
-        setTitle("Relatório Financeiro - " + mes + "/" + ano);
+        setTitle("💰 Relatório Financeiro");
         setSize(900, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -44,48 +43,91 @@ public class RelatorioFinanceiroFrame extends JFrame {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        JPanel filtroPanel = new JPanel();
-        filtroPanel.setBackground(Color.WHITE);
-        filtroPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        filtroPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        JPanel filtroPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filtroPanel.setBackground(new Color(34, 139, 120));
+        filtroPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
-        filtroPanel.add(new JLabel("Tipo:"));
+        JLabel tipoLabel = new JLabel("Tipo:");
+        tipoLabel.setForeground(Color.WHITE);
+        filtroPanel.add(tipoLabel);
+
         filtroTipo = new JComboBox<>(new String[]{"TODOS", "ENTRADA", "SAIDA"});
         filtroPanel.add(filtroTipo);
 
-        filtroPanel.add(new JLabel("Descrição:"));
+        JLabel descLabel = new JLabel("Descrição:");
+        descLabel.setForeground(Color.WHITE);
+        filtroPanel.add(descLabel);
+
         filtroDescricao = new JTextField(20);
+        filtroDescricao.setToolTipText("Digite a descrição");
         filtroPanel.add(filtroDescricao);
 
         JButton btnFiltrar = new JButton("Filtrar");
+        estilizarBotao(btnFiltrar, new Color(0, 128, 0), new Color(144, 238, 144));
         btnFiltrar.addActionListener(e -> aplicarFiltro());
         filtroPanel.add(btnFiltrar);
 
-        mainPanel.add(filtroPanel, BorderLayout.NORTH);
+        mainPanel.add(filtroPanel, BorderLayout.BEFORE_FIRST_LINE);
 
-        model = new DefaultTableModel(new String[]{"ID", "Data", "Tipo", "Descrição", "Valor"}, 0);
+        model = new DefaultTableModel(new String[]{"ID", "Data", "Tipo", "Descrição", "Valor"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+
         tabela = new JTable(model);
-        tabela.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tabela.setBackground(Color.WHITE);
+        tabela.setForeground(Color.BLACK);
+        tabela.setGridColor(new Color(34, 139, 34));
+        tabela.setSelectionBackground(new Color(60, 179, 113));
+        tabela.setSelectionForeground(Color.WHITE);
         tabela.setRowHeight(25);
-        JScrollPane scroll = new JScrollPane(tabela);
+
+        JScrollPane scrollPane = new JScrollPane(tabela);
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(Color.WHITE);
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        tablePanel.add(scroll, BorderLayout.CENTER);
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(tablePanel, BorderLayout.CENTER);
+
+        rowSorter = new TableRowSorter<>(model);
+        tabela.setRowSorter(rowSorter);
 
         carregarVendas(mes, ano);
         carregarSaidas(mes, ano);
 
-        float saldo = calcularSaldo();
-        lblSaldo = new JLabel("Saldo do mês: R$ " + saldo);
-        lblSaldo.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        mainPanel.add(lblSaldo, BorderLayout.SOUTH);
-
-        JButton exportarPDF = new JButton("Exportar PDF");
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(34, 139, 120));
+        JButton exportarPDF = new JButton("📄 Exportar PDF");
+        estilizarBotao(exportarPDF, new Color(0, 128, 0), new Color(144, 238, 144));
         exportarPDF.addActionListener(e -> exportarParaPDF(mes, ano));
-        mainPanel.add(exportarPDF, BorderLayout.SOUTH);
+        buttonPanel.add(exportarPDF);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JLabel lblSaldo = new JLabel("Saldo do mês: R$ " + calcularSaldo());
+        lblSaldo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblSaldo.setForeground(Color.WHITE);
+        lblSaldo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        mainPanel.add(lblSaldo, BorderLayout.AFTER_LAST_LINE);
+    }
+
+    private void estilizarBotao(JButton botao, Color corFundo, Color corHover) {
+        botao.setBackground(corFundo);
+        botao.setForeground(Color.WHITE);
+        botao.setFocusPainted(false);
+        botao.setBorderPainted(false);
+        botao.setOpaque(true);
+        botao.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                botao.setBackground(corHover);
+                botao.setForeground(Color.BLACK);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                botao.setBackground(corFundo);
+                botao.setForeground(Color.WHITE);
+            }
+        });
     }
 
     private void carregarVendas(int mes, int ano) {
@@ -109,7 +151,6 @@ public class RelatorioFinanceiroFrame extends JFrame {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao carregar vendas: " + e.getMessage());
         }
     }
 
@@ -137,13 +178,9 @@ public class RelatorioFinanceiroFrame extends JFrame {
 
     private void aplicarFiltro() {
         String tipoSelecionado = filtroTipo.getSelectedItem().toString();
-        String descFiltro = filtroDescricao.getText().trim().toLowerCase();
-
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
-        tabela.setRowSorter(sorter);
+        String descFiltro = filtroDescricao.getText().trim();
 
         java.util.List<RowFilter<Object, Object>> filtros = new java.util.ArrayList<>();
-
         if (!tipoSelecionado.equals("TODOS")) {
             filtros.add(RowFilter.regexFilter(tipoSelecionado, 2));
         }
@@ -152,12 +189,11 @@ public class RelatorioFinanceiroFrame extends JFrame {
         }
 
         if (filtros.isEmpty()) {
-            sorter.setRowFilter(null);
+            rowSorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(RowFilter.andFilter(filtros));
+            rowSorter.setRowFilter(RowFilter.andFilter(filtros));
         }
     }
-
 
     private float calcularSaldo() {
         float saldo = 0;
@@ -179,13 +215,12 @@ public class RelatorioFinanceiroFrame extends JFrame {
             fileChooser.setSelectedFile(new java.io.File("relatorio_financeiro_" + mes + "_" + ano + ".pdf"));
             if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 String caminho = fileChooser.getSelectedFile().getAbsolutePath();
-
                 Document doc = new Document();
                 PdfWriter.getInstance(doc, new java.io.FileOutputStream(caminho));
                 doc.open();
 
                 com.itextpdf.text.Font tituloFont = com.itextpdf.text.FontFactory.getFont(
-                        com.itextpdf.text.FontFactory.HELVETICA_BOLD, 18, com.itextpdf.text.BaseColor.BLACK);
+                        com.itextpdf.text.FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
                 Paragraph titulo = new Paragraph("💰 Relatório Financeiro - " + mes + "/" + ano + "\n\n", tituloFont);
                 titulo.setAlignment(Element.ALIGN_CENTER);
                 doc.add(titulo);
@@ -196,7 +231,7 @@ public class RelatorioFinanceiroFrame extends JFrame {
                 tabelaPDF.setSpacingAfter(10f);
 
                 com.itextpdf.text.Font headFont = com.itextpdf.text.FontFactory.getFont(
-                        com.itextpdf.text.FontFactory.HELVETICA_BOLD, 12, com.itextpdf.text.BaseColor.WHITE);
+                        com.itextpdf.text.FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
                 for (int i = 0; i < model.getColumnCount(); i++) {
                     PdfPCell header = new PdfPCell(new Paragraph(model.getColumnName(i), headFont));
                     header.setBackgroundColor(new BaseColor(0, 128, 0));
@@ -206,11 +241,8 @@ public class RelatorioFinanceiroFrame extends JFrame {
                 }
 
                 com.itextpdf.text.Font cellFont = com.itextpdf.text.FontFactory.getFont(
-                        com.itextpdf.text.FontFactory.HELVETICA, 11, com.itextpdf.text.BaseColor.BLACK);
+                        com.itextpdf.text.FontFactory.HELVETICA, 11, BaseColor.BLACK);
                 for (int i = 0; i < model.getRowCount(); i++) {
-                    if (tabela.getRowHeight(i) == 0) {
-                        continue;
-                    }
                     for (int j = 0; j < model.getColumnCount(); j++) {
                         PdfPCell cell = new PdfPCell(new Paragraph(model.getValueAt(i, j).toString(), cellFont));
                         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -227,7 +259,7 @@ public class RelatorioFinanceiroFrame extends JFrame {
                 Paragraph rodape = new Paragraph(
                         "Saldo do mês: R$ " + calcularSaldo(),
                         com.itextpdf.text.FontFactory.getFont(
-                                com.itextpdf.text.FontFactory.HELVETICA_BOLD, 12, com.itextpdf.text.BaseColor.DARK_GRAY)
+                                com.itextpdf.text.FontFactory.HELVETICA_BOLD, 12, BaseColor.DARK_GRAY)
                 );
                 rodape.setAlignment(Element.ALIGN_RIGHT);
                 doc.add(rodape);
