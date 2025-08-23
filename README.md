@@ -28,7 +28,7 @@ Seu objetivo é auxiliar mercearias no gerenciamento de suas operações interna
 
 ## 👥 Equipe
 
-- Desenvolvedora [Geovana Rodrigues](https://github.com/marianeoli)  
-- Desenvolvedora [Mariane Oliveira](https://github.com/murphiie)
+- Desenvolvedora [Geovana Rodrigues](https://github.com/murphiie)  
+- Desenvolvedora [Mariane Oliveira](https://github.com/marianeoli)
 
 
